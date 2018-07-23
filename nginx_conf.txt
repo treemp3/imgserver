@@ -1,0 +1,34 @@
+Nginx 负载均衡设置
+在http节点下，添加upstream节点：
+upstream backend { #定义负载均衡设备的Ip及设备状态
+    ip_hash;
+    server 10.0.0.11:9090 down;
+    server 10.0.0.12:8080 weight=2;
+    server 10.0.0.13:6060;
+    server 10.0.0.14:7070 backup;
+}
+在server节点下，修改location节点：
+location / {
+    proxy_pass http://backend;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+}
+location /10.0.0.12 {
+    proxy_pass http://10.0.0.12:8080;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+}
+location /10.0.0.13 {
+    proxy_pass http://10.0.0.13:6060;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+}
+location /10.0.0.14 {
+    proxy_pass http://10.0.0.14:7070;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+}
